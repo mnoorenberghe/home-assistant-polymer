@@ -49,15 +49,17 @@ class LoginForm extends LocalizeMixin(PolymerElement) {
       }
     </style>
 
+    <form id="form" action="javascript:" on-submit="onSubmit">
     <div class="layout vertical center center-center fit">
       <img src="/static/icons/favicon-192x192.png" height="192">
       <a href="#" id="hideKeyboardOnFocus"></a>
       <div class="interact">
         <div id="loginform" hidden\$="[[showSpinner]]">
-          <paper-input id="passwordInput" label="[[localize('ui.login-form.password')]]" type="password" autofocus="" invalid="[[errorMessage]]" error-message="[[errorMessage]]" value="{{password}}"></paper-input>
+          <paper-input id="passwordInput" label="[[localize('ui.login-form.password')]]" type="password" autofocus="" invalid="[[errorMessage]]" error-message="[[errorMessage]]" value="{{password}}" autocomplete="on"></paper-input>
           <div class="layout horizontal center">
             <paper-checkbox for="" id="rememberLogin">[[localize('ui.login-form.remember')]]</paper-checkbox>
-            <paper-button on-click="validatePassword">[[localize('ui.login-form.log_in')]]</paper-button>
+            <paper-button on-click="submit">[[localize('ui.login-form.log_in')]]</paper-button>
+            <button is="paper-button" type="submit" tabindex="-1">[[localize('ui.login-form.log_in')]]</button>
           </div>
         </div>
         <div id="validatebox" hidden\$="[[!showSpinner]]">
@@ -66,6 +68,7 @@ class LoginForm extends LocalizeMixin(PolymerElement) {
         </div>
       </div>
     </div>
+    </form>
 `;
   }
 
@@ -111,7 +114,7 @@ class LoginForm extends LocalizeMixin(PolymerElement) {
 
   ready() {
     super.ready();
-    this.addEventListener('keydown', ev => this.passwordKeyDown(ev));
+    this.addEventListener('input', ev => this.passwordInput(ev));
   }
 
   connectedCallback() {
@@ -137,18 +140,20 @@ class LoginForm extends LocalizeMixin(PolymerElement) {
     }
   }
 
-  passwordKeyDown(ev) {
-    // validate on enter
-    if (ev.keyCode === 13) {
-      this.validatePassword();
-      ev.preventDefault();
-    // clear error after we start typing again
-    } else if (this.errorMessage) {
-      this.errorMessage = '';
-    }
+  submit() {
+    console.log("submit");
+    this.$.form.submit();
+    this.onSubmit();
   }
 
-  validatePassword() {
+  passwordInput() {
+    console.log("passwordInput");
+    // clear errors when we start typing
+    this.errorMessage = '';
+  }
+
+  onSubmit() {
+    console.log("onSubmit");
     var auth = this.password;
     this.$.hideKeyboardOnFocus.focus();
     this.connectionPromise = window.createHassConnection(auth);
